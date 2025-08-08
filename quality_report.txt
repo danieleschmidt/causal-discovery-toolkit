@@ -1,0 +1,27 @@
+
+🛡️  QUALITY GATE REPORT
+==================================================
+
+📊 SUMMARY
+  Total Checks:      12
+  Passed:           9 ✅
+  Failed:           3 ❌
+  Critical Failures: 2 🚨
+  
+🔍 DETAILED RESULTS
+  ✅ PASS Project Structure: All essential files present
+  ✅ PASS Directory Structure: All essential directories present
+  ❌ FAIL Import Test: Failed to import main package: No module named 'src' [CRITICAL]
+  ✅ PASS Syntax Check: No syntax errors in 15 Python files
+  ✅ PASS Documentation Coverage: Docstring coverage: 100.0% (15/15 files)
+  ✅ PASS Code Size: Total lines of code: 3292
+  ✅ PASS Test Suite: All tests passed (0 tests)
+  ❌ FAIL Dependencies: Dependencies check: 3 importable, 7 failed
+  ✅ PASS README Content: README completeness: 67% (4/6 sections)
+  ✅ PASS Security Scan: Security scan: 0 potential issues found
+  ❌ FAIL Import Performance: Import failed: No module named 'src' [CRITICAL]
+  ✅ PASS Example Validation: Examples check: 1/1 valid
+
+⏱️  EXECUTION TIME: 3.39s
+
+🎯 OVERALL STATUS: ❌ FAILED
