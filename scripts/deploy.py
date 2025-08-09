@@ -9,10 +9,16 @@ from pathlib import Path
 from typing import Dict, List, Any
 import time
 
-# Add src to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+# Add current directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from utils.logging_config import get_logger
+try:
+    from causal_discovery_toolkit.utils.logging_config import get_logger
+except ImportError:
+    # Fallback logging
+    import logging
+    def get_logger(name):
+        return logging.getLogger(name)
 
 logger = get_logger("deploy")
 
