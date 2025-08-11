@@ -4,12 +4,20 @@ import pandas as pd
 import numpy as np
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from algorithms.base import SimpleLinearCausalModel
-from utils.data_processing import DataProcessor
-from utils.metrics import CausalMetrics
-from experiments.benchmark import CausalBenchmark
+# Add both package locations to path for robust import resolution
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+try:
+    from causal_discovery_toolkit import SimpleLinearCausalModel, DataProcessor, CausalMetrics
+    from causal_discovery_toolkit.experiments.benchmark import CausalBenchmark
+except ImportError:
+    # Fallback to direct imports
+    from algorithms.base import SimpleLinearCausalModel
+    from utils.data_processing import DataProcessor
+    from utils.metrics import CausalMetrics
+    from experiments.benchmark import CausalBenchmark
 
 
 def main():
