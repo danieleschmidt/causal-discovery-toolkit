@@ -1,20 +1,28 @@
 """High-performance optimized causal discovery algorithms."""
 
 from typing import Dict, Any, Optional
+import os
 import numpy as np
 import pandas as pd
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from .robust import RobustSimpleLinearCausalModel
-from ..utils.performance import global_optimizer, memoize_with_ttl, batch_processing
-from ..utils.monitoring import monitor_performance
-
 try:
+    from .robust import RobustSimpleLinearCausalModel
+    from ..utils.performance import global_optimizer, memoize_with_ttl, batch_processing
+    from ..utils.monitoring import monitor_performance
     from ..utils.logging_config import get_logger
     logger = get_logger(__name__)
 except ImportError:
+    # Fallback for direct imports
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+    from robust import RobustSimpleLinearCausalModel
+    from performance import global_optimizer, memoize_with_ttl, batch_processing
+    from monitoring import monitor_performance
     import logging
     logger = logging.getLogger(__name__)
 
@@ -46,7 +54,7 @@ class OptimizedCausalModel(RobustSimpleLinearCausalModel):
         self.enable_caching = enable_caching
         self.enable_parallel = enable_parallel
         self.cache_ttl = cache_ttl
-        self.max_workers = max_workers or min(8, (np.cpu_count() or 1) + 2)
+        self.max_workers = max_workers or min(8, (os.cpu_count() or 1) + 2)
         self.auto_optimize = auto_optimize
         
         # Performance tracking
@@ -314,7 +322,10 @@ class OptimizedCausalModel(RobustSimpleLinearCausalModel):
         for n_samples, n_features in data_sizes:
             for run in range(n_runs):
                 # Generate test data
-                from ..utils.data_processing import DataProcessor
+                try:
+                    from ..utils.data_processing import DataProcessor
+                except ImportError:
+                    from data_processing import DataProcessor
                 data_processor = DataProcessor()
                 test_data = data_processor.generate_synthetic_data(
                     n_samples=n_samples,
@@ -352,7 +363,7 @@ class OptimizedCausalModel(RobustSimpleLinearCausalModel):
         self.auto_optimize = True
         
         # Increase worker count for turbo mode
-        self.max_workers = min(16, (np.cpu_count() or 1) * 2)
+        self.max_workers = min(16, (os.cpu_count() or 1) * 2)
         
         logger.info("Turbo mode enabled: all optimizations active")
     

@@ -6,10 +6,21 @@ import pandas as pd
 from dataclasses import dataclass
 import warnings
 
-from .base import CausalDiscoveryModel, CausalResult
-from ..utils.validation import DataValidator, ParameterValidator, validate_adjacency_matrix
-from ..utils.logging_config import get_logger
-from ..utils.monitoring import monitor_performance, CircuitBreaker, CircuitBreakerOpenException
+try:
+    from .base import CausalDiscoveryModel, CausalResult
+    from ..utils.validation import DataValidator, ParameterValidator, validate_adjacency_matrix
+    from ..utils.logging_config import get_logger
+    from ..utils.monitoring import monitor_performance, CircuitBreaker, CircuitBreakerOpenException
+except ImportError:
+    # Fallback for direct imports
+    import sys
+    import os
+    sys.path.append(os.path.dirname(__file__))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+    from base import CausalDiscoveryModel, CausalResult
+    from validation import DataValidator, ParameterValidator, validate_adjacency_matrix
+    from logging_config import get_logger
+    from monitoring import monitor_performance, CircuitBreaker, CircuitBreakerOpenException
 
 logger = get_logger(__name__)
 

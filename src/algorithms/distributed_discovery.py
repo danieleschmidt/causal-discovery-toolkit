@@ -18,15 +18,26 @@ try:
     from .base import CausalDiscoveryModel, CausalResult
     from ..utils.performance import ConcurrentProcessor, PerformanceProfiler
 except ImportError:
-    from base import CausalDiscoveryModel, CausalResult
-    # Fallback implementations
-    class ConcurrentProcessor:
-        def __init__(self, *args, **kwargs): pass
-        def process_batch(self, func, items): return [func(item) for item in items]
-    class PerformanceProfiler:
-        def __init__(self): pass
-        def profile(self, func): return func
-        def get_stats(self): return {}
+    try:
+        from base import CausalDiscoveryModel, CausalResult
+        from utils.performance import ConcurrentProcessor, PerformanceProfiler
+    except ImportError:
+        # Final fallback - minimal implementations
+        from base import CausalDiscoveryModel, CausalResult
+        
+        class ConcurrentProcessor:
+            def __init__(self, *args, **kwargs): 
+                pass
+            def process_batch(self, func, items): 
+                return [func(item) for item in items]
+        
+        class PerformanceProfiler:
+            def __init__(self): 
+                pass
+            def profile(self, func): 
+                return func
+            def get_stats(self): 
+                return {}
 
 logger = logging.getLogger(__name__)
 

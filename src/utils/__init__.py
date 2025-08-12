@@ -7,6 +7,10 @@ from .logging_config import get_logger, CausalDiscoveryLogger
 from .monitoring import PerformanceMonitor, HealthChecker, monitor_performance
 from .security import DataSecurityValidator, SecureDataHandler, AccessControlManager
 from .performance import AdaptiveCache, ConcurrentProcessor, PerformanceOptimizer, global_optimizer
+from .auto_scaling import AutoScaler, AdaptiveParameterTuner, ResourceMonitor
+from .error_recovery import resilient_causal_discovery, ProgressiveExecution, SafetyWrapper
+from .robust_validation import RobustValidationSuite, DataQualityValidator
+from .bioneuro_data_processing import BioneuroDataProcessor, OlfactoryFeatureExtractor, OlfactoryDataProcessingConfig
 
 __all__ = [
     "DataProcessor",
@@ -26,4 +30,15 @@ __all__ = [
     "ConcurrentProcessor", 
     "PerformanceOptimizer",
     "global_optimizer",
+    "AutoScaler",
+    "AdaptiveParameterTuner",
+    "ResourceMonitor",
+    "resilient_causal_discovery",
+    "ProgressiveExecution",
+    "SafetyWrapper",
+    "RobustValidationSuite",
+    "DataQualityValidator",
+    "BioneuroDataProcessor",
+    "OlfactoryFeatureExtractor", 
+    "OlfactoryDataProcessingConfig",
 ]
