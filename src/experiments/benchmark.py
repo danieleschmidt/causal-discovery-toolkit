@@ -4,9 +4,19 @@ import time
 from typing import Dict, List, Any, Optional
 import pandas as pd
 import numpy as np
-from algorithms.base import CausalDiscoveryModel
-from utils.data_processing import DataProcessor
-from utils.metrics import CausalMetrics
+try:
+    from ..algorithms.base import CausalDiscoveryModel
+    from ..utils.data_processing import DataProcessor
+    from ..utils.metrics import CausalMetrics
+except ImportError:
+    # Fallback for direct imports
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'algorithms'))
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
+    from base import CausalDiscoveryModel
+    from data_processing import DataProcessor
+    from metrics import CausalMetrics
 
 
 class CausalBenchmark:

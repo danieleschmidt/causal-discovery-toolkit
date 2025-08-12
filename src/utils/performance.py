@@ -555,5 +555,124 @@ def batch_processing(batch_size: int = 1000):
     return decorator
 
 
+class PerformanceProfiler:
+    """Performance profiler for monitoring execution metrics."""
+    
+    def __init__(self):
+        """Initialize performance profiler."""
+        self._profiles = {}
+        self._active_profiles = {}
+        self._start_times = {}
+        
+    def profile(self, func: Callable = None, name: str = None):
+        """Profile a function or return a context manager.
+        
+        Args:
+            func: Function to profile (if used as decorator)
+            name: Custom name for the profile
+            
+        Returns:
+            Profiling decorator or context manager
+        """
+        if func is not None:
+            # Used as decorator
+            profile_name = name or f"{func.__module__}.{func.__name__}"
+            
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                start_time = time.time()
+                try:
+                    result = func(*args, **kwargs)
+                    return result
+                finally:
+                    execution_time = time.time() - start_time
+                    self._record_profile(profile_name, execution_time)
+            
+            return wrapper
+        else:
+            # Used as context manager
+            return ProfileContext(self, name)
+    
+    def start_profile(self, name: str) -> None:
+        """Start profiling with given name."""
+        self._start_times[name] = time.time()
+        
+    def end_profile(self, name: str) -> float:
+        """End profiling and return execution time."""
+        if name not in self._start_times:
+            logger.warning(f"No active profile found for: {name}")
+            return 0.0
+        
+        execution_time = time.time() - self._start_times[name]
+        del self._start_times[name]
+        self._record_profile(name, execution_time)
+        return execution_time
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get profiling statistics.
+        
+        Returns:
+            Dictionary with profiling statistics
+        """
+        stats = {}
+        
+        for profile_name, times in self._profiles.items():
+            if times:
+                stats[profile_name] = {
+                    'count': len(times),
+                    'total_time': sum(times),
+                    'avg_time': sum(times) / len(times),
+                    'min_time': min(times),
+                    'max_time': max(times),
+                    'last_time': times[-1] if times else 0
+                }
+        
+        return stats
+    
+    def clear_stats(self) -> None:
+        """Clear all profiling statistics."""
+        self._profiles.clear()
+        self._active_profiles.clear()
+        self._start_times.clear()
+        
+    def _record_profile(self, name: str, execution_time: float) -> None:
+        """Record a profile measurement."""
+        if name not in self._profiles:
+            self._profiles[name] = []
+        
+        self._profiles[name].append(execution_time)
+        
+        # Keep only recent measurements to prevent memory growth
+        max_measurements = 1000
+        if len(self._profiles[name]) > max_measurements:
+            self._profiles[name] = self._profiles[name][-max_measurements//2:]
+
+
+class ProfileContext:
+    """Context manager for profiling code blocks."""
+    
+    def __init__(self, profiler: PerformanceProfiler, name: str = None):
+        """Initialize profile context.
+        
+        Args:
+            profiler: PerformanceProfiler instance
+            name: Name for the profile
+        """
+        self.profiler = profiler
+        self.name = name or "anonymous_profile"
+        self.start_time = None
+    
+    def __enter__(self):
+        """Enter context and start profiling."""
+        self.start_time = time.time()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit context and record profiling result."""
+        if self.start_time is not None:
+            execution_time = time.time() - self.start_time
+            self.profiler._record_profile(self.name, execution_time)
+
+
 # Global optimizer instance
 global_optimizer = PerformanceOptimizer()

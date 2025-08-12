@@ -226,6 +226,25 @@ class ParameterValidator:
         }
         
         return ValidationResult(is_valid, errors, warnings_list, metadata)
+    
+    @staticmethod
+    def validate_range(param_name: str, value: float, min_val: float, max_val: float) -> None:
+        """Validate that a parameter is within a specified range.
+        
+        Args:
+            param_name: Name of the parameter
+            value: Value to validate
+            min_val: Minimum allowed value
+            max_val: Maximum allowed value
+            
+        Raises:
+            ValueError: If value is outside the valid range
+        """
+        if not isinstance(value, (int, float)):
+            raise ValueError(f"{param_name} must be numeric, got {type(value)}")
+        
+        if value < min_val or value > max_val:
+            raise ValueError(f"{param_name} must be between {min_val} and {max_val}, got {value}")
 
 
 def validate_adjacency_matrix(adj_matrix: np.ndarray) -> ValidationResult:
