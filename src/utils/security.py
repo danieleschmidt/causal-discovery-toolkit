@@ -43,6 +43,9 @@ class DataSecurityValidator:
             'firstname', 'lastname', 'fullname', 'credit', 'card',
             'account', 'password', 'pin', 'secret', 'key', 'token'
         ]
+        
+        self.max_memory_mb = 1000  # Maximum allowed memory usage
+        self.max_file_size_mb = 500  # Maximum allowed file size
     
     def validate_data_security(self, data: pd.DataFrame) -> SecurityResult:
         """Validate DataFrame for security and privacy concerns.
