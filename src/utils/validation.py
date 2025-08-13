@@ -34,6 +34,96 @@ class DataValidator:
         """
         self.strict = strict
     
+    def validate_dataset(self, data: pd.DataFrame) -> Dict[str, Any]:
+        """Validate dataset and return comprehensive results.
+        
+        Args:
+            data: Dataset to validate
+            
+        Returns:
+            Dictionary with validation results including is_valid, quality_score, issues, recommendations
+        """
+        validation_result = self.validate_input_data(data)
+        
+        # Calculate quality score
+        quality_score = self._calculate_quality_score(validation_result, data)
+        
+        # Generate recommendations
+        recommendations = self._generate_recommendations(validation_result, data)
+        
+        # Combine all issues
+        all_issues = validation_result.errors + validation_result.warnings
+        
+        return {
+            'is_valid': validation_result.is_valid,
+            'quality_score': quality_score,
+            'issues': all_issues,
+            'recommendations': recommendations,
+            'metadata': validation_result.metadata,
+            'detailed_results': validation_result
+        }
+    
+    def _calculate_quality_score(self, validation_result: ValidationResult, data: pd.DataFrame) -> float:
+        """Calculate a quality score for the dataset (0-1)."""
+        if not validation_result.is_valid:
+            return 0.0
+        
+        score = 1.0
+        
+        # Penalize for missing data
+        missing_pct = validation_result.metadata.get('missing_percentage', 0)
+        score -= min(missing_pct / 100.0, 0.5)
+        
+        # Penalize for constant columns
+        n_constant = len(validation_result.metadata.get('constant_cols', []))
+        n_features = validation_result.metadata.get('n_features', 1)
+        score -= (n_constant / n_features) * 0.3
+        
+        # Penalize for warnings
+        score -= len(validation_result.warnings) * 0.1
+        
+        # Bonus for good sample size
+        n_samples = validation_result.metadata.get('n_samples', 0)
+        if n_samples >= 1000:
+            score += 0.1
+        
+        return max(0.0, min(1.0, score))
+    
+    def _generate_recommendations(self, validation_result: ValidationResult, data: pd.DataFrame) -> List[str]:
+        """Generate actionable recommendations based on validation results."""
+        recommendations = []
+        
+        # Missing data recommendations
+        missing_pct = validation_result.metadata.get('missing_percentage', 0)
+        if missing_pct > 0:
+            if missing_pct > 10:
+                recommendations.append("Consider imputation or removal of rows/columns with excessive missing data")
+            else:
+                recommendations.append("Apply appropriate imputation strategies for missing values")
+        
+        # Sample size recommendations
+        n_samples = validation_result.metadata.get('n_samples', 0)
+        n_features = validation_result.metadata.get('n_features', 0)
+        if n_samples < 10 * n_features:
+            recommendations.append(f"Increase sample size to at least {10 * n_features} for more reliable results")
+        
+        # Constant columns
+        constant_cols = validation_result.metadata.get('constant_cols', [])
+        if constant_cols:
+            recommendations.append(f"Remove constant columns: {constant_cols}")
+        
+        # Perfect correlations
+        perfect_corr = validation_result.metadata.get('perfect_correlations', [])
+        if perfect_corr:
+            recommendations.append("Consider removing redundant variables with perfect correlations")
+        
+        # Memory usage
+        memory_mb = validation_result.metadata.get('memory_usage_mb', 0)
+        if memory_mb > 500:
+            recommendations.append("Consider data reduction techniques for large datasets")
+        
+        return recommendations
+    
     def validate_input_data(self, data: Any) -> ValidationResult:
         """Validate input data for causal discovery.
         
