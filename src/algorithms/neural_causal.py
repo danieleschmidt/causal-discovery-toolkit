@@ -428,6 +428,7 @@ class NeuralCausalDiscovery(CausalDiscoveryModel):
                 if epoch % 100 == 0:
                     logging.info(f"Epoch {epoch}, Loss: {avg_loss:.6f}")
             
+            self._fitted_data = data
             self.trained = True
             return self
             
@@ -485,6 +486,19 @@ class NeuralCausalDiscovery(CausalDiscoveryModel):
         except Exception as e:
             logging.error(f"Error in neural causal structure discovery: {e}")
             raise
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        # Convert DataFrame to numpy array if needed
+        if isinstance(data, pd.DataFrame):
+            data = data.values
+        
+        return self.discover_causal_structure(data)
 
     def explain_discovery(self, result: CausalResult) -> Dict[str, Any]:
         """Provide detailed explanation of the neural causal discovery."""

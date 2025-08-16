@@ -168,8 +168,9 @@ class QuantumCausalDiscovery(CausalDiscoveryModel):
         # Initialize quantum state
         self.quantum_state = self._initialize_quantum_state(n_variables)
         
-        # Store variable names
+        # Store variable names and fitted data
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         
         self.is_fitted = True
         return self
@@ -207,6 +208,15 @@ class QuantumCausalDiscovery(CausalDiscoveryModel):
             method_used="QuantumCausalDiscovery",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships using quantum measurement."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
 
 
 class QuantumEntanglementCausal(CausalDiscoveryModel):
@@ -292,6 +302,7 @@ class QuantumEntanglementCausal(CausalDiscoveryModel):
         
         n_variables = len(data.columns)
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         self.bell_states = self._create_bell_states(n_variables)
         
         self.is_fitted = True
@@ -334,3 +345,12 @@ class QuantumEntanglementCausal(CausalDiscoveryModel):
             method_used="QuantumEntanglementCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships using quantum entanglement."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
