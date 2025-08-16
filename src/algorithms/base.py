@@ -102,3 +102,7 @@ class SimpleLinearCausalModel(CausalDiscoveryModel):
                 "variable_names": list(data.columns)
             }
         )
+    
+    def predict(self, data: pd.DataFrame) -> CausalResult:
+        """Alias for discover method for compatibility."""
+        return self.discover(data)
