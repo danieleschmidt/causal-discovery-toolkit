@@ -8,6 +8,9 @@ from .information_theory import MutualInformationDiscovery, TransferEntropyDisco
 from .distributed_discovery import DistributedCausalDiscovery, StreamingCausalDiscovery, MemoryEfficientDiscovery
 from .robust_ensemble import RobustEnsembleDiscovery, EnsembleResult
 from .bioneuro_olfactory import OlfactoryNeuralCausalModel, MultiModalOlfactoryCausalModel, BioneuroFusionResult, OlfactoryNeuralSignal
+from .quantum_causal import QuantumCausalDiscovery, QuantumEntanglementCausal
+from .neuromorphic_causal import SpikingNeuralCausal, ReservoirComputingCausal
+from .topological_causal import PersistentHomologyCausal, AlgebraicTopologyCausal
 
 __all__ = [
     "CausalDiscoveryModel",
@@ -29,4 +32,10 @@ __all__ = [
     "MultiModalOlfactoryCausalModel", 
     "BioneuroFusionResult",
     "OlfactoryNeuralSignal",
+    "QuantumCausalDiscovery",
+    "QuantumEntanglementCausal",
+    "SpikingNeuralCausal",
+    "ReservoirComputingCausal",
+    "PersistentHomologyCausal",
+    "AlgebraicTopologyCausal",
 ]
