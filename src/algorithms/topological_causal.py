@@ -232,6 +232,7 @@ class PersistentHomologyCausal(CausalDiscoveryModel):
             raise ValueError("Data cannot be empty")
         
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -269,6 +270,15 @@ class PersistentHomologyCausal(CausalDiscoveryModel):
             method_used="PersistentHomologyCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
 
 
 class AlgebraicTopologyCausal(CausalDiscoveryModel):
@@ -385,6 +395,7 @@ class AlgebraicTopologyCausal(CausalDiscoveryModel):
             raise ValueError("Data cannot be empty")
         
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -418,6 +429,15 @@ class AlgebraicTopologyCausal(CausalDiscoveryModel):
             method_used="AlgebraicTopologyCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
 
 
 class UnionFind:

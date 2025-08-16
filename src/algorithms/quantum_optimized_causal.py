@@ -369,6 +369,7 @@ class QuantumAcceleratedCausal(CausalDiscoveryModel):
         self._initialize_quantum_acceleration(n_variables)
         
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -439,6 +440,15 @@ class QuantumAcceleratedCausal(CausalDiscoveryModel):
             method_used="QuantumAcceleratedCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
 
 
 class DistributedQuantumCausal(CausalDiscoveryModel):
@@ -586,6 +596,7 @@ class DistributedQuantumCausal(CausalDiscoveryModel):
             raise ValueError("Data cannot be empty")
         
         self.variable_names = list(data.columns)
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -624,3 +635,12 @@ class DistributedQuantumCausal(CausalDiscoveryModel):
         final_result = self._merge_partition_results(partition_results, data)
         
         return final_result
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)

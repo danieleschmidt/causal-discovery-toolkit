@@ -235,6 +235,7 @@ class SpikingNeuralCausal(CausalDiscoveryModel):
         self.neurons = self._initialize_neurons(n_variables)
         self.synapses = self._initialize_synapses(n_variables)
         
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -274,6 +275,15 @@ class SpikingNeuralCausal(CausalDiscoveryModel):
             method_used="SpikingNeuralCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)
 
 
 class ReservoirComputingCausal(CausalDiscoveryModel):
@@ -393,6 +403,7 @@ class ReservoirComputingCausal(CausalDiscoveryModel):
         # Initialize reservoir
         self._initialize_reservoir(n_variables)
         
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -425,3 +436,12 @@ class ReservoirComputingCausal(CausalDiscoveryModel):
             method_used="ReservoirComputingCausal",
             metadata=metadata
         )
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        return self.predict(data)

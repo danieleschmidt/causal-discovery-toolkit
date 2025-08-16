@@ -470,6 +470,7 @@ class FederatedCausalDiscovery(CausalDiscoveryModel):
             else:
                 logging.warning(f"No valid results in round {round_num + 1}")
         
+        self._fitted_data = data
         self.is_fitted = True
         return self
     
@@ -509,6 +510,19 @@ class FederatedCausalDiscovery(CausalDiscoveryModel):
         )
         
         return result
+    
+    def discover(self, data: Optional[pd.DataFrame] = None) -> CausalResult:
+        """Discover causal relationships."""
+        if data is None:
+            if not hasattr(self, '_fitted_data'):
+                raise ValueError("No data provided and model has no fitted data")
+            data = self._fitted_data
+        
+        # Convert DataFrame to numpy array if needed
+        if isinstance(data, pd.DataFrame):
+            data = data.values
+        
+        return self.discover_causal_structure(data)
     
     def privacy_analysis(self) -> Dict[str, Any]:
         """Analyze privacy guarantees of the federated system."""
