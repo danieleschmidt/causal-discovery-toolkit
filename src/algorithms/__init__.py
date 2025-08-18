@@ -11,6 +11,8 @@ from .bioneuro_olfactory import OlfactoryNeuralCausalModel, MultiModalOlfactoryC
 from .quantum_causal import QuantumCausalDiscovery, QuantumEntanglementCausal
 from .neuromorphic_causal import SpikingNeuralCausal, ReservoirComputingCausal
 from .topological_causal import PersistentHomologyCausal, AlgebraicTopologyCausal
+from .foundation_causal import FoundationCausalModel, MetaLearningCausalDiscovery, MultiModalCausalConfig
+from .self_supervised_causal import SelfSupervisedCausalModel, SelfSupervisedCausalConfig
 
 __all__ = [
     "CausalDiscoveryModel",
@@ -38,4 +40,9 @@ __all__ = [
     "ReservoirComputingCausal",
     "PersistentHomologyCausal",
     "AlgebraicTopologyCausal",
+    "FoundationCausalModel",
+    "MetaLearningCausalDiscovery",
+    "MultiModalCausalConfig",
+    "SelfSupervisedCausalModel",
+    "SelfSupervisedCausalConfig",
 ]
