@@ -1,6 +1,4 @@
-Now I'll create the merged version that combines both implementations intelligently:
-
-```python
+# 
 """Quantum-inspired causal discovery algorithms.
 
 This module implements breakthrough quantum-inspired approaches to causal discovery
@@ -854,4 +852,3 @@ class AdaptiveQuantumCausalDiscovery(QuantumCausalDiscovery):
             self.adaptive_params['quantum_iterations'] = int(self.quantum_iterations * 1.5)
         elif complexity_factor < 0.01:
             self.adaptive_params['quantum_iterations'] = int(self.quantum_iterations * 0.8)
-```
