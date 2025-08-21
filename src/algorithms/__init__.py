@@ -11,8 +11,17 @@ from .bioneuro_olfactory import OlfactoryNeuralCausalModel, MultiModalOlfactoryC
 from .quantum_causal import QuantumCausalDiscovery, QuantumEntanglementCausal
 from .neuromorphic_causal import SpikingNeuralCausal, ReservoirComputingCausal
 from .topological_causal import PersistentHomologyCausal, AlgebraicTopologyCausal
-from .foundation_causal import FoundationCausalModel, MetaLearningCausalDiscovery, MultiModalCausalConfig
-from .self_supervised_causal import SelfSupervisedCausalModel, SelfSupervisedCausalConfig
+# Optional torch-dependent imports
+try:
+    from .foundation_causal import FoundationCausalModel, MetaLearningCausalDiscovery, MultiModalCausalConfig
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+try:
+    from .self_supervised_causal import SelfSupervisedCausalModel, SelfSupervisedCausalConfig
+    SELF_SUPERVISED_AVAILABLE = True
+except ImportError:
+    SELF_SUPERVISED_AVAILABLE = False
 
 __all__ = [
     "CausalDiscoveryModel",
@@ -40,9 +49,5 @@ __all__ = [
     "ReservoirComputingCausal",
     "PersistentHomologyCausal",
     "AlgebraicTopologyCausal",
-    "FoundationCausalModel",
-    "MetaLearningCausalDiscovery",
-    "MultiModalCausalConfig",
-    "SelfSupervisedCausalModel",
-    "SelfSupervisedCausalConfig",
-]
+    # Add torch-dependent exports only if available
+] + (["FoundationCausalModel", "MetaLearningCausalDiscovery", "MultiModalCausalConfig"] if TORCH_AVAILABLE else []) + (["SelfSupervisedCausalModel", "SelfSupervisedCausalConfig"] if SELF_SUPERVISED_AVAILABLE else [])
