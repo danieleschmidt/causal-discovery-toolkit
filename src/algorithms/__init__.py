@@ -11,6 +11,26 @@ from .bioneuro_olfactory import OlfactoryNeuralCausalModel, MultiModalOlfactoryC
 from .quantum_causal import QuantumCausalDiscovery, QuantumEntanglementCausal
 from .neuromorphic_causal import SpikingNeuralCausal, ReservoirComputingCausal
 from .topological_causal import PersistentHomologyCausal, AlgebraicTopologyCausal
+# Breakthrough research algorithms
+from .llm_enhanced_causal import (
+    LLMEnhancedCausalDiscovery, 
+    LLMInterface, 
+    OpenAIInterface,
+    MultiAgentLLMConsensus,
+    LLMCausalResponse,
+    ConfidenceLevel,
+    discover_causal_relationships_with_llm
+)
+from .rl_causal_agent import (
+    RLCausalAgent,
+    CausalAction,
+    ActionType,
+    CausalState,
+    RewardFunction,
+    CurriculumLearning,
+    discover_causality_with_rl
+)
+
 # Optional torch-dependent imports
 try:
     from .foundation_causal import FoundationCausalModel, MetaLearningCausalDiscovery, MultiModalCausalConfig
@@ -49,5 +69,20 @@ __all__ = [
     "ReservoirComputingCausal",
     "PersistentHomologyCausal",
     "AlgebraicTopologyCausal",
+    # Breakthrough research algorithms
+    "LLMEnhancedCausalDiscovery",
+    "LLMInterface", 
+    "OpenAIInterface",
+    "MultiAgentLLMConsensus",
+    "LLMCausalResponse",
+    "ConfidenceLevel",
+    "discover_causal_relationships_with_llm",
+    "RLCausalAgent",
+    "CausalAction",
+    "ActionType", 
+    "CausalState",
+    "RewardFunction",
+    "CurriculumLearning",
+    "discover_causality_with_rl",
     # Add torch-dependent exports only if available
 ] + (["FoundationCausalModel", "MetaLearningCausalDiscovery", "MultiModalCausalConfig"] if TORCH_AVAILABLE else []) + (["SelfSupervisedCausalModel", "SelfSupervisedCausalConfig"] if SELF_SUPERVISED_AVAILABLE else [])
