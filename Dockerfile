@@ -1,55 +1,32 @@
-# Production-ready Docker image for Causal Discovery Toolkit
-FROM python:3.11-slim
+FROM python:3.9-slim
 
-# Set metadata
-LABEL maintainer="Daniel Schmidt <daniel@terragonlabs.ai>"
-LABEL description="Causal Discovery Toolkit - Production Ready"
-LABEL version="0.1.0"
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONPATH=/app/src
-
-# Create app user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
-# Set working directory
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first (for better caching)
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY src/ ./src/
+COPY production_config.yaml ./
 
-# Install the package
-RUN pip install -e .
+# Create non-root user
+RUN useradd -m -u 1000 causal && chown -R causal:causal /app
+USER causal
 
-# Create necessary directories and set permissions
-RUN mkdir -p /app/logs /app/data /app/cache && \
-    chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
+# Set environment variables
+ENV PYTHONPATH=/app/src
+ENV CAUSAL_CONFIG_PATH=/app/production_config.yaml
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD python -c "import causal_discovery_toolkit; print('OK')" || exit 1
-
-# Expose port (if running as web service)
-EXPOSE 8000
+    CMD python -c "import src.algorithms.base; print('OK')" || exit 1
 
 # Default command
-CMD ["python", "-m", "causal_discovery_toolkit.cli", "--help"]
+CMD ["python", "-m", "src.algorithms.scalable_causal"]

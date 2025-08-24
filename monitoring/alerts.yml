@@ -1,0 +1,35 @@
+groups:
+- name: causal_discovery_alerts
+  rules:
+  - alert: HighCPUUsage
+    annotations:
+      description: CPU usage is above 85% for more than 2 minutes
+      summary: High CPU usage detected
+    expr: cpu_usage_percent > 85
+    for: 2m
+    labels:
+      severity: warning
+  - alert: HighMemoryUsage
+    annotations:
+      description: Memory usage is above 80% for more than 2 minutes
+      summary: High memory usage detected
+    expr: memory_usage_percent > 80
+    for: 2m
+    labels:
+      severity: warning
+  - alert: SlowResponseTime
+    annotations:
+      description: Average response time is above 5 seconds
+      summary: Slow response times detected
+    expr: avg_response_time_ms > 5000
+    for: 1m
+    labels:
+      severity: critical
+  - alert: HighErrorRate
+    annotations:
+      description: Error rate is above 5% for more than 1 minute
+      summary: High error rate detected
+    expr: error_rate_percent > 5
+    for: 1m
+    labels:
+      severity: critical

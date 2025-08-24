@@ -476,19 +476,74 @@ class PerformanceOptimizer:
         key_string = f"{operation}_{data_info}"
         return hashlib.md5(key_string.encode()).hexdigest()[:16]
     
-    def _record_optimization(self, operation: str, data_size: int, 
-                           computation_time: float) -> None:
+    def _record_optimization(self, operation: str, data_size: int, computation_time: float) -> None:
         """Record optimization metrics."""
-        self._optimization_history.append({
+        entry = {
             'timestamp': time.time(),
             'operation': operation,
             'data_size': data_size,
             'computation_time': computation_time
-        })
+        }
         
-        # Keep only recent history
-        if len(self._optimization_history) > 1000:
-            self._optimization_history = self._optimization_history[-500:]
+        self._optimization_history.append(entry)
+        
+        # Limit history size
+        if len(self._optimization_history) > 100:
+            self._optimization_history.pop(0)
+
+
+class BatchProcessor:
+    """Process data in batches for memory efficiency."""
+    
+    def __init__(self, batch_size: int = 1000, max_workers: int = 4):
+        """Initialize batch processor.
+        
+        Args:
+            batch_size: Size of each batch
+            max_workers: Maximum number of parallel workers
+        """
+        self.batch_size = batch_size
+        self.max_workers = max_workers
+        
+        logger.info(f"Initialized BatchProcessor: batch_size={batch_size}, workers={max_workers}")
+    
+    def process_in_batches(self, data: pd.DataFrame, 
+                          process_func: Callable[[pd.DataFrame], Any],
+                          aggregate_func: Optional[Callable[[list], Any]] = None) -> Any:
+        """Process data in batches.
+        
+        Args:
+            data: Input data
+            process_func: Function to process each batch
+            aggregate_func: Function to aggregate batch results
+            
+        Returns:
+            Aggregated result
+        """
+        n_samples = len(data)
+        n_batches = (n_samples + self.batch_size - 1) // self.batch_size
+        
+        logger.info(f"Processing {n_samples} samples in {n_batches} batches")
+        
+        results = []
+        
+        # Process batches
+        for i in range(0, n_samples, self.batch_size):
+            batch = data.iloc[i:i+self.batch_size]
+            result = process_func(batch)
+            results.append(result)
+        
+        # Aggregate results
+        if aggregate_func:
+            return aggregate_func(results)
+        else:
+            return results
+
+
+# Global instances
+global_cache = AdaptiveCache()
+global_processor = ConcurrentProcessor()
+global_performance_optimizer = PerformanceOptimizer()
 
 
 def memoize_with_ttl(ttl: float = 3600):

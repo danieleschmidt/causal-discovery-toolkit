@@ -4,10 +4,10 @@ from .data_processing import DataProcessor
 from .metrics import CausalMetrics
 from .validation import DataValidator, ParameterValidator, ValidationResult
 from .logging_config import get_logger, CausalDiscoveryLogger
-from .monitoring import PerformanceMonitor, HealthChecker, monitor_performance
+from .monitoring import PerformanceMonitor, HealthMonitor, monitor_performance
 from .security import DataSecurityValidator, SecureDataHandler, AccessControlManager
 from .performance import AdaptiveCache, ConcurrentProcessor, PerformanceOptimizer, global_optimizer
-from .auto_scaling import AutoScaler, AdaptiveParameterTuner, ResourceMonitor
+from .auto_scaling import AutoScaler, ResourceMonitor
 from .error_recovery import resilient_causal_discovery, ProgressiveExecution, SafetyWrapper
 from .robust_validation import RobustValidationSuite, DataQualityValidator
 from .bioneuro_data_processing import BioneuroDataProcessor, OlfactoryFeatureExtractor, OlfactoryDataProcessingConfig
@@ -21,7 +21,7 @@ __all__ = [
     "get_logger",
     "CausalDiscoveryLogger",
     "PerformanceMonitor",
-    "HealthChecker",
+    "HealthMonitor",
     "monitor_performance",
     "DataSecurityValidator",
     "SecureDataHandler",
@@ -31,7 +31,6 @@ __all__ = [
     "PerformanceOptimizer",
     "global_optimizer",
     "AutoScaler",
-    "AdaptiveParameterTuner",
     "ResourceMonitor",
     "resilient_causal_discovery",
     "ProgressiveExecution",
