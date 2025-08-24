@@ -7,6 +7,7 @@ from typing import Dict, Any, Optional, Callable, List
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import json
+from enum import Enum
 try:
     from .logging_config import get_logger
     logger = get_logger(__name__)
@@ -14,6 +15,13 @@ except ImportError:
     # Fallback for testing
     import logging
     logger = logging.getLogger(__name__)
+
+
+class CircuitBreakerState(Enum):
+    """Circuit breaker states."""
+    CLOSED = "CLOSED"
+    OPEN = "OPEN"
+    HALF_OPEN = "HALF_OPEN"
 
 
 @dataclass
@@ -225,6 +233,103 @@ class HealthChecker:
             return {}
 
 
+class HealthMonitor:
+    """Monitor system and application health."""
+    
+    def __init__(self):
+        """Initialize health monitor."""
+        self.checks = {}
+        self.last_check_results: Dict[str, Any] = {}
+        self.last_check_time: Optional[datetime] = None
+        self._register_default_checks()
+    
+    def _register_default_checks(self):
+        """Register default health checks."""
+        self.register_check("memory_usage", self._check_memory_usage)
+        self.register_check("cpu_usage", self._check_cpu_usage) 
+        self.register_check("disk_space", self._check_disk_space)
+    
+    def register_check(self, name: str, check_func: Callable[[], Dict[str, Any]]):
+        """Register a health check function."""
+        self.checks[name] = check_func
+        logger.info(f"Registered health check: {name}")
+    
+    def run_health_checks(self) -> Dict[str, Any]:
+        """Run all registered health checks."""
+        results = {"overall_healthy": True}
+        
+        for name, check_func in self.checks.items():
+            try:
+                start_time = time.time()
+                result = check_func()
+                duration = time.time() - start_time
+                
+                results[name] = {
+                    "status": "healthy" if result.get("healthy", True) else "unhealthy",
+                    "details": result,
+                    "duration_seconds": duration
+                }
+                
+                if not result.get("healthy", True):
+                    results["overall_healthy"] = False
+                    
+            except Exception as e:
+                results[name] = {
+                    "status": "error",
+                    "details": {"error": str(e)},
+                    "duration_seconds": 0
+                }
+                results["overall_healthy"] = False
+                logger.error(f"Health check error in {name}: {e}")
+        
+        self.last_check_results = results
+        self.last_check_time = datetime.now()
+        
+        return results
+    
+    def _check_memory_usage(self) -> Dict[str, Any]:
+        """Check memory usage."""
+        memory = psutil.virtual_memory()
+        return {
+            "healthy": memory.percent < 90,
+            "memory_percent": memory.percent,
+            "memory_available_gb": memory.available / 1024**3
+        }
+    
+    def _check_cpu_usage(self) -> Dict[str, Any]:
+        """Check CPU usage."""
+        cpu_percent = psutil.cpu_percent(interval=1)
+        return {
+            "healthy": cpu_percent < 90,
+            "cpu_percent": cpu_percent,
+            "cpu_count": psutil.cpu_count()
+        }
+    
+    def _check_disk_space(self) -> Dict[str, Any]:
+        """Check disk space."""
+        disk = psutil.disk_usage('/')
+        percent_used = (disk.used / disk.total) * 100
+        return {
+            "healthy": percent_used < 90,
+            "disk_percent_used": percent_used,
+            "disk_free_gb": disk.free / 1024**3
+        }
+    
+    def check_system_health(self) -> bool:
+        """Quick system health check."""
+        try:
+            memory = psutil.virtual_memory()
+            cpu = psutil.cpu_percent(interval=0.1)
+            
+            if memory.percent > 95 or cpu > 95:
+                logger.warning(f"System under stress: Memory={memory.percent}%, CPU={cpu}%")
+                return False
+            return True
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return False
+
+
 class CircuitBreaker:
     """Circuit breaker pattern for fault tolerance."""
     
@@ -245,7 +350,7 @@ class CircuitBreaker:
         
         self.failure_count = 0
         self.last_failure_time: Optional[datetime] = None
-        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
+        self.state = CircuitBreakerState.CLOSED
         self._lock = threading.Lock()
     
     def call(self, func: Callable, *args, **kwargs) -> Any:
@@ -263,9 +368,9 @@ class CircuitBreaker:
             CircuitBreakerOpenException: When circuit is open
         """
         with self._lock:
-            if self.state == "OPEN":
+            if self.state == CircuitBreakerState.OPEN:
                 if self._should_attempt_reset():
-                    self.state = "HALF_OPEN"
+                    self.state = CircuitBreakerState.HALF_OPEN
                 else:
                     raise CircuitBreakerOpenException(
                         f"Circuit breaker is OPEN. Last failure: {self.last_failure_time}"
@@ -289,7 +394,7 @@ class CircuitBreaker:
     def _on_success(self) -> None:
         """Handle successful function execution."""
         self.failure_count = 0
-        self.state = "CLOSED"
+        self.state = CircuitBreakerState.CLOSED
         logger.debug("Circuit breaker: Success - reset to CLOSED")
     
     def _on_failure(self) -> None:
@@ -298,10 +403,29 @@ class CircuitBreaker:
         self.last_failure_time = datetime.now()
         
         if self.failure_count >= self.failure_threshold:
-            self.state = "OPEN"
+            self.state = CircuitBreakerState.OPEN
             logger.warning(
                 f"Circuit breaker: OPENED after {self.failure_count} failures"
             )
+    
+    def can_proceed(self) -> bool:
+        """Check if operations can proceed."""
+        with self._lock:
+            if self.state == CircuitBreakerState.CLOSED:
+                return True
+            elif self.state == CircuitBreakerState.OPEN:
+                return self._should_attempt_reset()
+            elif self.state == CircuitBreakerState.HALF_OPEN:
+                return True
+            return False
+    
+    def record_success(self) -> None:
+        """Record a successful operation."""
+        self._on_success()
+    
+    def record_failure(self) -> None:
+        """Record a failed operation."""
+        self._on_failure()
 
 
 class CircuitBreakerOpenException(Exception):
@@ -311,46 +435,64 @@ class CircuitBreakerOpenException(Exception):
 
 # Global instances
 global_monitor = PerformanceMonitor()
-global_health_checker = HealthChecker()
+global_health_monitor = HealthMonitor()
 
 
-def monitor_performance(operation_name: str = "operation"):
+def monitor_performance(func_or_name=None):
     """Decorator for monitoring function performance."""
-    def decorator(func):
+    def actual_decorator(func):
         def wrapper(*args, **kwargs):
+            operation_name = func_or_name if isinstance(func_or_name, str) else func.__name__
             metrics = global_monitor.start_monitoring(operation_name)
             try:
                 result = func(*args, **kwargs)
-                global_monitor.add_custom_metric('success', True)
                 return result
             except Exception as e:
-                global_monitor.add_custom_metric('success', False)
-                global_monitor.add_custom_metric('error', str(e))
                 raise
             finally:
                 global_monitor.stop_monitoring()
         return wrapper
-    return decorator
+    
+    # Handle both @monitor_performance and @monitor_performance("name") cases
+    if callable(func_or_name):
+        # Direct usage: @monitor_performance
+        return actual_decorator(func_or_name)
+    else:
+        # Parameterized usage: @monitor_performance("name")
+        return actual_decorator
 
 
 # Register default health checks
-def _check_memory_usage() -> bool:
+def _check_memory_usage() -> Dict[str, Any]:
     """Check if memory usage is within acceptable limits."""
-    memory_usage = psutil.virtual_memory().percent
-    return memory_usage < 90
+    memory = psutil.virtual_memory()
+    return {
+        "healthy": memory.percent < 90,
+        "memory_percent": memory.percent,
+        "memory_available_gb": memory.available / 1024**3
+    }
 
-def _check_cpu_usage() -> bool:
+def _check_cpu_usage() -> Dict[str, Any]:
     """Check if CPU usage is within acceptable limits."""
-    cpu_usage = psutil.cpu_percent(interval=1)
-    return cpu_usage < 95
+    cpu_percent = psutil.cpu_percent(interval=0.1)
+    return {
+        "healthy": cpu_percent < 95,
+        "cpu_percent": cpu_percent,
+        "cpu_count": psutil.cpu_count()
+    }
 
-def _check_disk_space() -> bool:
+def _check_disk_space() -> Dict[str, Any]:
     """Check if disk space is sufficient."""
-    disk_usage = psutil.disk_usage('/').percent
-    return disk_usage < 95
+    disk = psutil.disk_usage('/')
+    percent_used = (disk.used / disk.total) * 100
+    return {
+        "healthy": percent_used < 95,
+        "disk_percent_used": percent_used,
+        "disk_free_gb": disk.free / 1024**3
+    }
 
 
 # Register default health checks
-global_health_checker.register_check("memory_usage", _check_memory_usage)
-global_health_checker.register_check("cpu_usage", _check_cpu_usage)
-global_health_checker.register_check("disk_space", _check_disk_space)
+global_health_monitor.register_check("memory_usage", _check_memory_usage)
+global_health_monitor.register_check("cpu_usage", _check_cpu_usage)
+global_health_monitor.register_check("disk_space", _check_disk_space)

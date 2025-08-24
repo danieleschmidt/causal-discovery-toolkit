@@ -1,0 +1,37 @@
+data_validation:
+  max_features: 1000
+  max_samples: 100000
+  min_sample_ratio: 10
+  strict_mode: false
+debug: false
+environment: production
+logging:
+  format: json
+  level: INFO
+  retention_days: 30
+  rotation: daily
+monitoring:
+  alert_thresholds:
+    cpu_percent: 85
+    error_rate_percent: 5
+    memory_percent: 80
+    response_time_ms: 5000
+  health_check_interval: 30
+  metrics_collection: true
+performance:
+  cache_size: 2000
+  cache_ttl_hours: 24
+  enable_monitoring: true
+  max_workers: 8
+  optimization_level: balanced
+scalability:
+  auto_scaling: true
+  max_workers: 16
+  min_workers: 2
+  scale_down_threshold: 0.3
+  scale_up_threshold: 0.8
+security:
+  access_control: true
+  data_encryption: true
+  enable_audit_logging: true
+  rate_limiting: true
