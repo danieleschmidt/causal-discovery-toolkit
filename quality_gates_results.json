@@ -1,0 +1,148 @@
+{
+  "overall_status": "WARNING",
+  "overall_score": 71.66666666666667,
+  "total_execution_time": 2.4078948497772217,
+  "gates_executed": 6,
+  "status_summary": {
+    "passed": 4,
+    "failed": 1,
+    "warning": 1,
+    "skipped": 0,
+    "error": 0
+  },
+  "category_scores": {
+    "syntax": 0.0,
+    "security": 60.0,
+    "performance": 90.0,
+    "functionality": 95.0,
+    "reliability": 85.0,
+    "maintainability": 100.0
+  },
+  "detailed_results": [
+    {
+      "name": "Security Scan",
+      "category": "security",
+      "status": "warning",
+      "score": 60.0,
+      "execution_time": 0.6901347637176514,
+      "message": "Found 2 potential security issues",
+      "details": {
+        "issues": [
+          "Potential hardcoded secret in /root/repo/comprehensive_quality_system.py",
+          "Potential hardcoded secret in /root/repo/src/quality_gates/comprehensive_quality_system.py"
+        ]
+      },
+      "recommendations": [
+        "Review identified security issues",
+        "Use environment variables for secrets"
+      ]
+    },
+    {
+      "name": "Python Syntax Check",
+      "category": "syntax",
+      "status": "failed",
+      "score": 0.0,
+      "execution_time": 1.3112432956695557,
+      "message": "Syntax errors found in 1 files",
+      "details": {
+        "errors": [
+          "/root/repo/src/quality_gates/comprehensive_quality_system.py: f-string: expecting '}' (comprehensive_quality_system.py, line 398)"
+        ],
+        "files_checked": 4113
+      },
+      "recommendations": null
+    },
+    {
+      "name": "Maintainability Analysis",
+      "category": "maintainability",
+      "status": "passed",
+      "score": 100.0,
+      "execution_time": 0.48607826232910156,
+      "message": "Good code maintainability",
+      "details": {
+        "total_python_files": 155,
+        "total_lines_of_code": 68122,
+        "comment_lines": 5109,
+        "empty_lines": 13595,
+        "functions_count": 2254,
+        "classes_count": 466,
+        "comment_ratio": 0.0749977980681718,
+        "avg_lines_per_file": 439.4967741935484,
+        "functions_per_file": 14.541935483870967,
+        "classes_per_file": 3.0064516129032257
+      },
+      "recommendations": null
+    },
+    {
+      "name": "Functionality Tests",
+      "category": "functionality",
+      "status": "passed",
+      "score": 95.0,
+      "execution_time": 2.362560749053955,
+      "message": "All functionality tests passed (3/3)",
+      "details": {
+        "test_results": [
+          {
+            "test": "data_processing",
+            "status": "pass"
+          },
+          {
+            "test": "causal_discovery",
+            "status": "pass"
+          },
+          {
+            "test": "cli_exists",
+            "status": "pass"
+          }
+        ],
+        "pass_rate": 1.0
+      },
+      "recommendations": null
+    },
+    {
+      "name": "Performance Benchmark",
+      "category": "performance",
+      "status": "passed",
+      "score": 90.0,
+      "execution_time": 2.401996374130249,
+      "message": "Performance meets or exceeds requirements",
+      "details": {
+        "import_time": 2.400674343109131,
+        "data_generation_time": 0.0005412101745605469,
+        "model_execution_time": 0.0007369518280029297,
+        "total_execution_time": 2.401996374130249
+      },
+      "recommendations": null
+    },
+    {
+      "name": "Reliability Tests",
+      "category": "reliability",
+      "status": "passed",
+      "score": 85.0,
+      "execution_time": 1.7124340534210205,
+      "message": "Good error handling and reliability (3/3)",
+      "details": {
+        "reliability_tests": [
+          {
+            "test": "empty_dataframe",
+            "status": "pass",
+            "reason": "correctly_handled_error"
+          },
+          {
+            "test": "invalid_input",
+            "status": "pass",
+            "reason": "correctly_handled_error"
+          },
+          {
+            "test": "nan_handling",
+            "status": "pass",
+            "reason": "handled_gracefully"
+          }
+        ],
+        "reliability_score": 1.0
+      },
+      "recommendations": null
+    }
+  ],
+  "timestamp": 1756217688.183284
+}
